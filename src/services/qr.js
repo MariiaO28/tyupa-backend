@@ -13,7 +13,9 @@ export const generateBatchQRCodes = async (count) => {
       const qrCodeImage = await QRCode.toDataURL(url);
 
       const qrCode = new QRCodeCollection({ codeId });
-      await qrCode.save();
+      const savedQRCode = await qrCode.save();
+
+      console.log('Saved QR code:', savedQRCode);
 
       codes.push({ qrCodeImage, codeId });
     }
