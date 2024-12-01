@@ -3,16 +3,14 @@ import env from '../utils/env.js';
 import { generateBatchQRCodes, processQRCode } from '../services/qr.js';
 
 export const generateQRCodeBatch = async (req, res) => {
-
     const { count } = req.body;
-    console.log(req.body);
 
     try {
         const qrCodes = await generateBatchQRCodes(count);
 
         res.status(201).json({
             status: 201,
-            message: `${count} QR codes generated successfully`,
+            message:`${count} QR codes generated successfully`,
             data: qrCodes,
         });
     } catch (error) {

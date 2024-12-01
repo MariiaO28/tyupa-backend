@@ -6,6 +6,7 @@ import notFoundHandler from './middlewares/notFoundHandler.js';
 import errorHandler from './middlewares/errorHandler.js';
 import router from './routers/index.js';
 import cookieParser from 'cookie-parser';
+import {QR_CREATE_DIR} from './constants/index.js';
 
 const PORT = Number(env('PORT', 3000));
 
@@ -32,6 +33,8 @@ const setupServer = () => {
       },
     }),
   );
+
+  app.use('/qr-codes', express.static(QR_CREATE_DIR));
 
   app.get('/', (req, res) => {
     res.send({

@@ -4,8 +4,8 @@ const qrCodeSchema = new Schema(
    {
       codeId: { type: String, unique: true },
       isAssigned: { type: Boolean, default: false },
-      petId: { type: Schema.Types.ObjectId, ref: 'Pet', default: null },
-      userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+      qrCodeImageUrl: { type: String, required: true },
+      qrCodeImagePath: { type: String, required: true },
     },
    { timestamps: true, versionKey: false },
 );

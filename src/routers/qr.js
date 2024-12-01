@@ -12,10 +12,15 @@ qrCodeRouter.post(
     ctrlWrapper(generateQRCodeBatch),
 );
 
-
 qrCodeRouter.get(
     '/scanQR/:codeId',
     ctrlWrapper(scanQRCode),
 );
+
+// qrCodeRouter.put(
+//     '/assignPetAndUserToQRCode',
+//     validateBody(createQRCodeSchema),
+//     ctrlWrapper(assignPetAndUserToQRCode),
+// );
 
 export default qrCodeRouter;

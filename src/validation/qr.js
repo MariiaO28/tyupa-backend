@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
 export const createQRCodeSchema = Joi.object({
-    count: Joi.number().integer().min(1).required(),
-    codeId: Joi.string().optional(),
+    codeId: Joi.number().required(),
     isAssigned: Joi.boolean().default(false),
-    userId: Joi.string().allow(null).optional(),
+    qrCodeImageUrl: Joi.string().allow(null),
+    qrCodeImagePath: Joi.string().allow(null),
   });
