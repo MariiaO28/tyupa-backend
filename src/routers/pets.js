@@ -15,13 +15,16 @@ import isValidId from '../middlewares/isValidId.js';
 const petsRouter = Router();
 
 petsRouter.get('/', ctrlWrapper(getAllPetsController));
+
 petsRouter.get('/:petId', isValidId, ctrlWrapper(getPetByIdController));
 petsRouter.use(authenticate);
+
 petsRouter.post(
   '/',
   validateBody(createPetScheme),
   ctrlWrapper(createPetController),
 );
+
 petsRouter.patch(
   '/:petId',
   isValidId,

@@ -17,6 +17,6 @@ if (!fs.existsSync(QR_CODE_DIR)) {
 
 export const QR_CREATE_DIR = path.join(process.cwd(), 'qr-codes');
 
-// export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
+export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 
-// export const UPLOAD_DIR = path.join(process.cwd(), 'upload');
+export const UPLOAD_DIR = path.join(process.cwd(), 'upload');
