@@ -1,4 +1,5 @@
 import createHttpError from 'http-errors';
+import { hashCompare } from '../utils/hashFuncs.js';
 import {
   createPet,
   deletePet,
@@ -7,6 +8,7 @@ import {
   updatePet,
 } from '../services/pets.js';
 import { QRCodeCollection } from '../db/models/qr.js';
+import { findUser } from '../services/auth.js';
 
 export const getAllPetsController = async (req, res, next) => {
   const pets = await getAllPets();
@@ -67,8 +69,14 @@ export const createPetController = async (req, res, next) => {
 
 export const patchPetController = async (req, res, next) => {
   const userId = req.user._id;
+  const { code, ...rest} = req.body;
   const { petId } = req.params;
-  const result = await updatePet(petId, userId, req.body);
+  const user = await findUser({_id: userId});
+  const isEqual = await hashCompare(code, user.password);
+     if (!isEqual) {
+       throw createHttpError(401, 'Unauthorized');
+     }
+  const result = await updatePet(petId, userId, rest);
   if (!result) {
     next(
       createHttpError(404, {

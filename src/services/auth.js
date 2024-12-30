@@ -1,14 +1,13 @@
 import createHttpError from 'http-errors';
 import { UsersCollection } from '../db/models/user.js';
-import bcrypt from 'bcrypt';
 import { SessionsCollection } from '../db/models/session.js';
 import { createSession } from '../utils/createSession.js';
+import { hashCompare, hashValue } from '../utils/hashFuncs.js';
 
 export const findUser = (filter) => UsersCollection.findOne(filter);
 
 export const registerUser = async (payload) => {
-  const encryptedPassword = await bcrypt.hash(payload.password, 10);
-  console.log(encryptedPassword);
+  const encryptedPassword = await hashValue(payload.password);
   return await UsersCollection.create({
     ...payload,
     password: encryptedPassword,
@@ -20,7 +19,7 @@ export const loginUser = async (payload) => {
   if (!user) {
     throw createHttpError(404, 'User not found');
   }
-  const isEqual = await bcrypt.compare(payload.password, user.password);
+  const isEqual = await hashCompare(payload.password, user.password);
   if (!isEqual) {
     throw createHttpError(401, 'Unauthorized');
   }

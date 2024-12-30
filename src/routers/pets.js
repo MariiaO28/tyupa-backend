@@ -26,8 +26,7 @@ petsRouter.post(
 );
 
 petsRouter.patch(
-  '/:petId',
-  isValidId,
+  '/:petId', isValidId,
   validateBody(patchPetScheme),
   ctrlWrapper(patchPetController),
 );
