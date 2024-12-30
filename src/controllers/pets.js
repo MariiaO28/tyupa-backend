@@ -7,6 +7,7 @@ import {
   getPetById,
   updatePet,
 } from '../services/pets.js';
+import { QRCodeCollection } from '../db/models/qr.js';
 import { findUser } from '../services/auth.js';
 
 export const getAllPetsController = async (req, res, next) => {
@@ -37,14 +38,32 @@ export const getPetByIdController = async (req, res, next) => {
 
 export const createPetController = async (req, res, next) => {
   const userId = req.user._id;
+  const { codeId } = req.body;
+
+  const qrCode = await QRCodeCollection.findOne({ codeId });
+
+  if (!qrCode) {
+      return next(createHttpError(404, 'QR Code not found'));
+  }
+
+  if (qrCode.isAssigned) {
+      return res.status(400).json({ message: 'QR Code already assigned to a pet and user' });
+  }
+
   const pet = await createPet({ owner: userId, ...req.body });
   if (!pet) {
     return next(createHttpError(400, 'Something went wrong'));
   }
+
+  qrCode.userId = userId;
+  qrCode.petId = pet._id;
+  qrCode.isAssigned = true;
+  await qrCode.save();
+
   res.status(201).json({
     status: 201,
-    message: 'Successfully created a pet',
-    data: pet,
+    message: 'Successfully created a pet and assigned QR Code',
+    data: { pet, qrCode },
   });
 };
 
@@ -97,3 +116,4 @@ export const deletePetController = async (req, res, next) => {
     data: contact,
   });
 };
+
