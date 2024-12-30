@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   createPetController,
   deletePetController,
-  // getAllPetsController,
+  getAllPetsController,
   getPetByIdController,
   patchPetController,
 } from '../controllers/pets.js';
