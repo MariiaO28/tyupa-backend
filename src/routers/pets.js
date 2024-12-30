@@ -2,7 +2,7 @@ import { Router } from 'express';
 import {
   createPetController,
   deletePetController,
-  getAllPetsController,
+  // getAllPetsController,
   getPetByIdController,
   patchPetController,
 } from '../controllers/pets.js';
@@ -14,17 +14,16 @@ import isValidId from '../middlewares/isValidId.js';
 
 const petsRouter = Router();
 
-petsRouter.get('/', ctrlWrapper(getAllPetsController));
-petsRouter.get('/:petId', isValidId, ctrlWrapper(getPetByIdController));
+// petsRouter.get('/', ctrlWrapper(getAllPetsController));
 petsRouter.use(authenticate);
+petsRouter.get('/:petId', isValidId, ctrlWrapper(getPetByIdController));
 petsRouter.post(
   '/',
   validateBody(createPetScheme),
   ctrlWrapper(createPetController),
 );
 petsRouter.patch(
-  '/:petId',
-  isValidId,
+  '/:petId', isValidId,
   validateBody(patchPetScheme),
   ctrlWrapper(patchPetController),
 );

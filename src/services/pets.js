@@ -1,5 +1,6 @@
 import { PetsCollection } from '../db/models/pet.js';
 
+
 export const getAllPets = async () => {
   const pets = await PetsCollection.find();
   return pets;
@@ -17,7 +18,7 @@ export const createPet = async (pet) => {
 };
 
 export const updatePet = async (petId, userId, data) => {
-  const rawResult = await PetsCollection.findOneAndUpdate(
+ const rawResult = await PetsCollection.findOneAndUpdate(
     { _id: petId, owner: userId },
     data,
     {

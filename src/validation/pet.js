@@ -8,7 +8,6 @@ export const createPetScheme = Joi.object({
   breed: Joi.string().required(),
   color: Joi.string().required(),
   telegram: Joi.string().required(),
-  //   owner: Joi.string().required(),
 });
 
 export const patchPetScheme = Joi.object({
@@ -19,4 +18,5 @@ export const patchPetScheme = Joi.object({
   breed: Joi.string(),
   color: Joi.string(),
   telegram: Joi.string(),
+  code:Joi.string().required()
 });
