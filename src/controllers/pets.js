@@ -38,6 +38,8 @@ export const getPetByIdController = async (req, res, next) => {
 };
 
 export const createPetController = async (req, res, next) => {
+  // const session = await mongoose.startSession();
+  // session.startTransaction();
   const { codeId } = req.body;
 
   const qrCode = await QRCodeCollection.findOne({ codeId });
@@ -47,7 +49,7 @@ export const createPetController = async (req, res, next) => {
   }
 
   if (qrCode.isAssigned) {
-      return res.status(400).json({ message: 'QR Code already assigned to a pet and user' });
+      return res.status(400).json({ message: 'QR Code already assigned to a pet' });
   }
 
   const pet = await createPet({ codeId, ...req.body });

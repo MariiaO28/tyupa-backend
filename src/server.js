@@ -46,6 +46,7 @@ const setupServer = () => {
   app.use('*', notFoundHandler);
   app.use('/upload', express.static(UPLOAD_DIR));
 
+
   app.use(errorHandler);
 
   app.listen(PORT, () => {

@@ -43,10 +43,10 @@ export const generateBatchQRCodes = async (count) => {
         }
 
         if (qrCode.userId && qrCode.petId) {
-            return { redirectUrl: `/pet/${qrCode.petId}` };
+            return { redirectUrl: `/pets/${qrCode.petId}` };
         }
 
-        return { redirectUrl: `/register/${codeId}` };
+        return { redirectUrl: `/auth/${codeId}` };
     };
 
     // export const assignPetAndUserToQRCode = async (req, res) => {
