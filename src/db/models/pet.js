@@ -6,12 +6,6 @@ const petsSchema = new Schema(
     birthday: {
       type: Date,
       required: true,
-      // validate: {
-      //   validator: function(value) {
-      //     return value instanceof Date && !isNaN(value);
-      //   },
-      //   message: 'Invalid date format'
-      // }
     },
     phone: { type: String, required: true },
     gender: {
