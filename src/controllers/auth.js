@@ -1,4 +1,6 @@
 import createHttpError from 'http-errors';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import {
   findUser,
   loginUser,
@@ -6,6 +8,8 @@ import {
   registerUser,
 } from '../services/auth.js';
 import { setupSessionCookies } from '../utils/createSession.js';
+import { sendEmail } from '../utils/sendMail.js';
+import { TEMPLATES_DIR } from '../constants/index.js';
 
 export const registerUserController = async (req, res) => {
   const { email } = req.body;
@@ -32,6 +36,59 @@ export const loginUserController = async (req, res) => {
       accessToken: session.accessToken,
       user,
     },
+  });
+};
+
+export const requestResetPasswordByEmailController = async (req, res) => {
+  const { email } = req.body;
+  const user = await findUser({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  // const resetToken = jwt.sign(
+  //   {
+  //     sub: user._id,
+  //     email,
+  //   },
+  //   env('JWT_SECRET'),
+  //   {
+  //     expiresIn: '5m',
+  //   },
+  // );
+  
+  const resetPasswordTemplatePath = path.join(
+    TEMPLATES_DIR,
+    'reset-password-email.html',
+  );
+  
+  const templateSource = (
+    await fs.readFile(resetPasswordTemplatePath)
+  ).toString();
+  
+  // const template = handlebars.compile(templateSource);
+  // const html = template({
+  //   name: user.name,
+  //   code: `1234`,
+  // });
+  
+  try {
+
+    await sendEmail({
+      to: email,
+      subject: 'Reset your password',
+      html: 'test',
+    });
+  } catch{ 
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
+  // await requestResetToken(email);
+  res.json({
+    message: 'Reset password email has been successfully sent.',
+    status: 200,
+    data: {},
   });
 };
 

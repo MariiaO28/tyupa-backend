@@ -33,6 +33,10 @@ export const loginUser = async (payload) => {
   return { user, session };
 };
 
+export const requestResetToken = async(email)=>{
+
+};
 export const logoutUser = async (sessionId) => {
   await SessionsCollection.deleteOne({ _id: sessionId });
 };
+
