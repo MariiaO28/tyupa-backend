@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose';
 
 const petsSchema = new Schema(
   {
+    codeId: { type: String, required: true },
     name: { type: String, required: true },
     birthday: {
       type: Date,
@@ -17,7 +18,7 @@ const petsSchema = new Schema(
     color: { type: String, required: true },
     telegram: { type: String, required: true },
     avatar: {type: String, default:""},
-    owner: { type: Schema.Types.ObjectId, ref: 'users' },
+    // owner: { type: Schema.Types.ObjectId, ref: 'users' },
   },
   { timestamps: true, versionKey: false },
 );

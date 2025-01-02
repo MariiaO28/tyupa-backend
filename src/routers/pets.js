@@ -5,19 +5,26 @@ import {
   getAllPetsController,
   getPetByIdController,
   patchPetController,
+  updatePetPhotoController,
 } from '../controllers/pets.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { validateBody } from '../middlewares/validateBody.js';
 import { createPetScheme, patchPetScheme } from '../validation/pet.js';
 import { authenticate } from '../middlewares/authenticate.js';
 import isValidId from '../middlewares/isValidId.js';
+import { upload } from '../middlewares/multer.js';
 
 const petsRouter = Router();
 
-petsRouter.get('/', ctrlWrapper(getAllPetsController));
+petsRouter.get(
+  '/',
+  ctrlWrapper(getAllPetsController));
 
-petsRouter.get('/:petId', isValidId, ctrlWrapper(getPetByIdController));
-petsRouter.use(authenticate);
+petsRouter.get(
+  '/:petId',
+  isValidId,
+  ctrlWrapper(getPetByIdController));
+
 
 petsRouter.post(
   '/',
@@ -26,10 +33,26 @@ petsRouter.post(
 );
 
 petsRouter.patch(
-  '/:petId', isValidId,
+  '/:petId',
+  isValidId,
+  authenticate,
   validateBody(patchPetScheme),
   ctrlWrapper(patchPetController),
 );
-petsRouter.delete('/:petId', isValidId, ctrlWrapper(deletePetController));
+
+petsRouter.patch(
+  '/:petId/photo',
+  isValidId,
+  upload.single('avatar'),
+  authenticate,
+  validateBody(patchPetScheme),
+  ctrlWrapper(updatePetPhotoController),
+);
+
+petsRouter.delete(
+  '/:petId',
+  isValidId,
+  authenticate,
+  ctrlWrapper(deletePetController));
 
 export default petsRouter;
