@@ -1,7 +1,9 @@
 import createHttpError from 'http-errors';
+import handlebars from 'handlebars';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import {
+  createNewOTP,
   findUser,
   loginUser,
   logoutUser,
@@ -9,7 +11,10 @@ import {
 } from '../services/auth.js';
 import { setupSessionCookies } from '../utils/createSession.js';
 import { sendEmail } from '../utils/sendMail.js';
-import { TEMPLATES_DIR } from '../constants/index.js';
+import { FIFTEEN_MINUTES, TEMPLATES_DIR } from '../constants/index.js';
+import getDigit from '../utils/getDigit.js';
+import { hashValue } from '../utils/hashFuncs.js';
+import userOPTCollection from '../db/models/userOTP.js';
 
 export const registerUserController = async (req, res) => {
   const { email } = req.body;
@@ -55,30 +60,44 @@ export const requestResetPasswordByEmailController = async (req, res) => {
   //     expiresIn: '5m',
   //   },
   // );
-  
+
+  const resetPin = getDigit();
+  const hashedPin = await hashValue(resetPin);
+
+  const newOTPEntry = await createNewOTP(
+    new userOPTCollection({
+      userId: user._id,
+      otp: hashedPin,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + FIFTEEN_MINUTES),
+    }),
+  );
+
+  if (!newOTPEntry) {
+    throw createHttpError(500, 'Failed to create new OTP entry');
+  }
+
   const resetPasswordTemplatePath = path.join(
     TEMPLATES_DIR,
     'reset-password-email.html',
   );
-  
+
   const templateSource = (
     await fs.readFile(resetPasswordTemplatePath)
   ).toString();
-  
-  // const template = handlebars.compile(templateSource);
-  // const html = template({
-  //   name: user.name,
-  //   code: `1234`,
-  // });
-  
-  try {
 
+  const template = handlebars.compile(templateSource);
+  const html = template({
+    code: resetPin,
+  });
+
+  try {
     await sendEmail({
       to: email,
       subject: 'Reset your password',
-      html: 'test',
+      html: html,
     });
-  } catch{ 
+  } catch {
     throw createHttpError(
       500,
       'Failed to send the email, please try again later.',

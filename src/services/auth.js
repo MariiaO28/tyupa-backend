@@ -3,6 +3,7 @@ import { UsersCollection } from '../db/models/user.js';
 import { SessionsCollection } from '../db/models/session.js';
 import { createSession } from '../utils/createSession.js';
 import { hashCompare, hashValue } from '../utils/hashFuncs.js';
+import userOTPjs from '../db/models/userOTP.js';
 
 export const findUser = (filter) => UsersCollection.findOne(filter);
 
@@ -33,10 +34,9 @@ export const loginUser = async (payload) => {
   return { user, session };
 };
 
-export const requestResetToken = async(email)=>{
-
+export const createNewOTP = async (data) => {
+  return await userOTPjs.create(data);
 };
 export const logoutUser = async (sessionId) => {
   await SessionsCollection.deleteOne({ _id: sessionId });
 };
-
