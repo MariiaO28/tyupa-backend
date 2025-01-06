@@ -2,16 +2,11 @@ import { model, Schema } from 'mongoose';
 
 const petsSchema = new Schema(
   {
+    codeId: { type: String, required: true },
     name: { type: String, required: true },
     birthday: {
       type: Date,
       required: true,
-      // validate: {
-      //   validator: function(value) {
-      //     return value instanceof Date && !isNaN(value);
-      //   },
-      //   message: 'Invalid date format'
-      // }
     },
     phone: { type: String, required: true },
     gender: {
@@ -23,7 +18,7 @@ const petsSchema = new Schema(
     color: { type: String, required: true },
     telegram: { type: String, required: true },
     avatar: {type: String, default:""},
-    owner: { type: Schema.Types.ObjectId, ref: 'users' },
+    // owner: { type: Schema.Types.ObjectId, ref: 'users' },
   },
   { timestamps: true, versionKey: false },
 );

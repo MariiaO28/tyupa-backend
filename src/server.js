@@ -6,7 +6,7 @@ import notFoundHandler from './middlewares/notFoundHandler.js';
 import errorHandler from './middlewares/errorHandler.js';
 import router from './routers/index.js';
 import cookieParser from 'cookie-parser';
-import {QR_CREATE_DIR} from './constants/index.js';
+import {QR_CREATE_DIR, UPLOAD_DIR} from './constants/index.js';
 
 const PORT = Number(env('PORT', 3000));
 
@@ -15,16 +15,16 @@ const setupServer = () => {
 
   app.use(express.json());
   app.use(cookieParser());
-  app.use(cors());
+  // app.use(cors());
 
-  // app.use(
-  //     cors({
-  //         origins:'*',
-  //         methods:'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  //         allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
-  //         credentials: true,
-  //     })
-  // );
+  app.use(
+      cors({
+          origins:'*',
+          methods:'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+          allowedHeaders: 'Content-Type, Authorization, X-Requested-With',
+          credentials: true,
+      })
+  );
 
   app.use(
     pino({
@@ -44,6 +44,8 @@ const setupServer = () => {
   app.use(router);
 
   app.use('*', notFoundHandler);
+  app.use('/upload', express.static(UPLOAD_DIR));
+
 
   app.use(errorHandler);
 

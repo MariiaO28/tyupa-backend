@@ -12,24 +12,39 @@ export const getPetById = async (petId) => {
 };
 
 export const createPet = async (pet) => {
-  console.log(`WORKING: ${pet}`);
+  console.log("Received pet data:", pet);
   const petCreated = await PetsCollection.create(pet);
   return petCreated;
 };
 
+// export const updatePet = async (petId, userId, data) => {
+//  const rawResult = await PetsCollection.findOneAndUpdate(
+//     { _id: petId, owner: userId },
+//     data,
+//     {
+//       new: true,
+//       includeResultMetadata: true,
+//     },
+//   );
+//   if (!rawResult || !rawResult.value) return null;
+//   return {
+//     pet: rawResult.value,
+//     isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+//   };
+// };
+
 export const updatePet = async (petId, userId, data) => {
- const rawResult = await PetsCollection.findOneAndUpdate(
+  const updatedPet = await PetsCollection.findOneAndUpdate(
     { _id: petId, owner: userId },
-    data,
-    {
-      new: true,
-      includeResultMetadata: true,
-    },
+    { $set: data },
+    { new: true },
   );
-  if (!rawResult || !rawResult.value) return null;
+
+  if (!updatedPet) return null;
+
   return {
-    pet: rawResult.value,
-    isNew: Boolean(rawResult?.lastErrorObject?.upserted),
+    pet: updatedPet,
+    isNew: false,
   };
 };
 
