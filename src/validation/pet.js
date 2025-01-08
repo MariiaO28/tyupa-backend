@@ -22,5 +22,5 @@ export const patchPetScheme = Joi.object({
   color: Joi.string(),
   telegram: Joi.string(),
   avatar: Joi.string().allow('').optional(),
-  // code:Joi.string().required()
+  code:Joi.string().required()
 });
