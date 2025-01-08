@@ -4,12 +4,14 @@ import { SessionsCollection } from '../db/models/session.js';
 import { createSession } from '../utils/createSession.js';
 import { hashCompare, hashValue } from '../utils/hashFuncs.js';
 import { QRCodeCollection } from '../db/models/qr.js';
-import userOTPjs from '../db/models/userOTP.js';
+import userOTP from '../db/models/userOTP.js';
 
 export const findUser = (filter) => UsersCollection.findOne(filter);
 
 export const registerUser = async (payload) => {
-  const encryptedPassword = await hashValue(payload.password|| 'defaultPassword');
+  const encryptedPassword = await hashValue(
+    payload.password || 'defaultPassword',
+  );
   return await UsersCollection.create({
     ...payload,
     password: encryptedPassword,
@@ -67,19 +69,41 @@ export const loginUser = async (payload) => {
     throw createHttpError(400, 'Invalid login data');
   }
 
-    await SessionsCollection.deleteOne({ userId: user._id });
-    const newSession = createSession();
+  await SessionsCollection.deleteOne({ userId: user._id });
+  const newSession = createSession();
 
-    const session = await SessionsCollection.create({
+  const session = await SessionsCollection.create({
     userId: user._id,
     ...newSession,
-   });
+  });
   return { user, session };
 };
 
-export const createNewOTP = async (data) => {
-  return await userOTPjs.create(data);
+export const findUserOTP = async (userId) => {
+  const response = await userOTP.findOne({
+    userId,
+    expiresAt: { $gt: new Date() },
+  });
+
+  return response;
 };
+
+export const passwordReset = async (userId, password) => {
+  const user = await UsersCollection.findOneAndUpdate(
+    { _id: userId },
+    { password: password },
+  );
+  await SessionsCollection.deleteMany({ userId });
+
+  await userOTP.deleteOne({ userId });
+
+  return user;
+};
+
+export const createNewOTP = async (data) => {
+  return await userOTP.create(data);
+};
+
 export const logoutUser = async (sessionId) => {
   await SessionsCollection.deleteOne({ _id: sessionId });
 };

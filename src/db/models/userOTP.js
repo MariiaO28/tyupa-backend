@@ -3,7 +3,8 @@ import { Schema, model } from 'mongoose';
 const userOTPSchema = new Schema(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: 'users',
       required: true,
     },
     otp: {
@@ -25,5 +26,5 @@ const userOTPSchema = new Schema(
   },
 );
 
- const userOPTCollection = model('userOTP', userOTPSchema);
- export default userOPTCollection;
+const userOPTCollection = model('userOTP', userOTPSchema);
+export default userOPTCollection;

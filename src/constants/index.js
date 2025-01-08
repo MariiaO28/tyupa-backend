@@ -31,3 +31,6 @@ export const TEMP_UPLOAD_DIR = path.join(process.cwd(), 'temp');
 export const UPLOAD_DIR = path.join(process.cwd(), 'upload');
 
 export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
+
+export const FRONTEND_URL = 'http://localhost:5173';
+// export const FRONTEND_URL = 'https://tyupa-frontend.vercel.app/';

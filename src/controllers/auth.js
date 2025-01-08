@@ -8,12 +8,18 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  findUserOTP,
+  passwordReset,
 } from '../services/auth.js';
 import { setupSessionCookies } from '../utils/createSession.js';
 import { sendEmail } from '../utils/sendMail.js';
-import { FIFTEEN_MINUTES, TEMPLATES_DIR } from '../constants/index.js';
+import {
+  FIFTEEN_MINUTES,
+  FRONTEND_URL,
+  TEMPLATES_DIR,
+} from '../constants/index.js';
 import getDigit from '../utils/getDigit.js';
-import { hashValue } from '../utils/hashFuncs.js';
+import { hashValue, hashCompare } from '../utils/hashFuncs.js';
 import userOPTCollection from '../db/models/userOTP.js';
 
 export const registerUserController = async (req, res) => {
@@ -63,7 +69,8 @@ export const requestResetPasswordByEmailController = async (req, res) => {
 
   const resetPin = getDigit();
   const hashedPin = await hashValue(resetPin);
-
+  
+ 
   const newOTPEntry = await createNewOTP(
     new userOPTCollection({
       userId: user._id,
@@ -72,6 +79,7 @@ export const requestResetPasswordByEmailController = async (req, res) => {
       expiresAt: new Date(Date.now() + FIFTEEN_MINUTES),
     }),
   );
+
 
   if (!newOTPEntry) {
     throw createHttpError(500, 'Failed to create new OTP entry');
@@ -89,6 +97,8 @@ export const requestResetPasswordByEmailController = async (req, res) => {
   const template = handlebars.compile(templateSource);
   const html = template({
     code: resetPin,
+    reset_link: `${FRONTEND_URL}/reset-password/${user._id}`,
+    // logo: `${FRONTEND_URL}/assets/assets/logo_tablet1x-C2mOCeVL.png`,
   });
 
   try {
@@ -103,9 +113,36 @@ export const requestResetPasswordByEmailController = async (req, res) => {
       'Failed to send the email, please try again later.',
     );
   }
-  // await requestResetToken(email);
   res.json({
     message: 'Reset password email has been successfully sent.',
+    status: 200,
+    data: {},
+  });
+};
+
+export const updatePasswordController = async (req, res) => {
+  const { otp, password } = req.body;
+  const { userId } = req.params;
+ 
+  const otpEntry = await findUserOTP(userId);
+
+  if (!otpEntry) {
+    throw createHttpError(400, 'A reset code has expired or does not exist');
+  }
+
+  const isPinValid = await hashCompare(otp, otpEntry.otp);
+  if (!isPinValid) {
+    throw createHttpError(400, 'Invalid reset code');
+  }
+
+  const newHashedPin = await hashValue(password);
+  const isUpdated = await passwordReset(userId, newHashedPin);
+  if (!isUpdated) {
+    throw createHttpError(500, 'Failed to update the password');
+  }
+
+  res.json({
+    message: 'Your password has been successfully updated.',
     status: 200,
     data: {},
   });
