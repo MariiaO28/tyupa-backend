@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { PetsCollection } from '../db/models/pet.js';
 
 
@@ -7,12 +8,11 @@ export const getAllPets = async () => {
 };
 
 export const getPetById = async (petId) => {
-  const pet = await PetsCollection.find({ _id: petId });
+  const pet = await PetsCollection.findOne({ _id: new ObjectId(petId) });
   return pet;
 };
 
 export const createPet = async (pet) => {
-  console.log("Received pet data:", pet);
   const petCreated = await PetsCollection.create(pet);
   return petCreated;
 };
@@ -33,14 +33,65 @@ export const createPet = async (pet) => {
 //   };
 // };
 
+// export const updatePet = async (petId, userId, data) => {
+
+//   const objectIdPet = typeof petId === 'string' ? new ObjectId(petId) : petId;
+//   const objectIdUser = typeof userId === 'string' ? new ObjectId(userId) : userId;
+
+//   console.log('Параметри пошуку в базі:', {
+//     petId: objectIdPet,
+//     userId: objectIdUser,
+//   });
+
+//   const updatedPet = await PetsCollection.findOneAndUpdate(
+//     { _id: objectIdPet, owner: objectIdUser },
+//     { $set: data },
+//     { new: true },
+//   );
+
+//   if (!updatedPet) {
+//     console.log('Документ не знайдено, переконайтесь у правильності petId та userId');
+//     return null;
+//   }
+
+//   if (!updatedPet) return null;
+
+//   return {
+//     pet: updatedPet,
+//     isNew: false,
+//   };
+// };
+
 export const updatePet = async (petId, userId, data) => {
+
+  const objectIdPet = typeof petId === 'string' ? new ObjectId(petId) : petId;
+  const objectIdUser = typeof userId === 'string' ? new ObjectId(userId) : userId;
+
+  console.log('Параметри пошуку в базі:', {
+    petId: objectIdPet,
+    userId: objectIdUser,
+  });
+
+  const existingPet = await PetsCollection.findOne({
+    petId: objectIdPet,
+    owner: objectIdUser
+  });
+
+  if (!existingPet) {
+    console.log('Тварина не знайдена з таким petId та owner.');
+    return null;
+  }
+
   const updatedPet = await PetsCollection.findOneAndUpdate(
-    { _id: petId, owner: userId },
+    { petId: objectIdPet, owner: objectIdUser },
     { $set: data },
     { new: true },
   );
 
-  if (!updatedPet) return null;
+  if (!updatedPet) {
+    console.log('Документ не знайдено для оновлення');
+    return null;
+  }
 
   return {
     pet: updatedPet,

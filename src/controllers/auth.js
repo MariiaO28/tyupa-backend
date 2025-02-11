@@ -1,11 +1,27 @@
 import createHttpError from 'http-errors';
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import {
+  createNewOTP,
   findUser,
   loginUser,
   logoutUser,
   registerUser,
+  findUserOTP,
+  passwordReset,
 } from '../services/auth.js';
 import { setupSessionCookies } from '../utils/createSession.js';
+import { sendEmail } from '../utils/sendMail.js';
+import {
+  FIFTEEN_MINUTES,
+  FRONTEND_URL,
+  TEMPLATES_DIR,
+} from '../constants/index.js';
+import getDigit from '../utils/getDigit.js';
+import { hashValue, hashCompare } from '../utils/hashFuncs.js';
+import userOPTCollection from '../db/models/userOTP.js';
+
 
 export const registerUserController = async (req, res) => {
   const { email } = req.body;
@@ -32,6 +48,94 @@ export const loginUserController = async (req, res) => {
       accessToken: session.accessToken,
       user,
     },
+  });
+};
+
+export const requestResetPasswordByEmailController = async (req, res) => {
+  const { email } = req.body;
+  const user = await findUser({ email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  // const resetToken = jwt.sign(
+  //   {
+  //     sub: user._id,
+  //     email,
+  //   },
+  //   env('JWT_SECRET'),
+  //   {
+  //     expiresIn: '5m',
+  //   },
+  // );
+
+  const resetPin = getDigit();
+  const hashedPin = await hashValue(resetPin);
+
+  const newOTPEntry = await createNewOTP(
+    new userOPTCollection({
+      userId: user._id,
+      otp: hashedPin,
+      createdAt: new Date(),
+      expiresAt: new Date(Date.now() + FIFTEEN_MINUTES),
+    }),
+  );
+
+  if (!newOTPEntry) {
+    throw createHttpError(500, 'Failed to create new OTP entry');
+  }
+
+  const templateSource =
+     (await fs.readFile(path.join(TEMPLATES_DIR, 'reset-password-email.html'))).toString();
+
+  const html = handlebars.compile(templateSource)({
+    code: resetPin,
+    reset_link: `${FRONTEND_URL}/reset-password/${user._id}`,
+    // logo: `${FRONTEND_URL}/assets/assets/logo_tablet1x-C2mOCeVL.png`,
+  });
+
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Reset your password',
+      html: html,
+    });
+  } catch {
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
+  res.json({
+    message: 'Reset password email has been successfully sent.',
+    status: 200,
+    data: {},
+  });
+};
+
+export const updatePasswordController = async (req, res) => {
+  const { otp, password } = req.body;
+  const { userId } = req.params;
+
+  const otpEntry = await findUserOTP(userId);
+  if (!otpEntry) {
+    throw createHttpError(400, 'A reset code has expired or does not exist');
+  }
+
+  const isPinValid = await hashCompare(otp, otpEntry.otp);
+  if (!isPinValid) {
+    throw createHttpError(400, 'Invalid reset code');
+  }
+
+  const newHashedPin = await hashValue(password);
+  const isUpdated = await passwordReset(userId, newHashedPin);
+  if (!isUpdated) {
+    throw createHttpError(500, 'Failed to update the password');
+  }
+
+  res.json({
+    message: 'Your password has been successfully updated.',
+    status: 200,
+    data: {},
   });
 };
 

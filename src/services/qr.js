@@ -1,9 +1,11 @@
 import QRCode from 'qrcode';
 import mongoose from 'mongoose';
-import createHttpError from 'http-errors';
 import path from 'path';
+import createHttpError from 'http-errors';
 import { QRCodeCollection } from '../db/models/qr.js';
+import { UsersCollection } from '../db/models/user.js';
 import { QR_CREATE_DIR } from '../constants/index.js';
+import { createSession } from '../utils/createSession.js';
 
 export const generateBatchQRCodes = async (count) => {
     const codes = [];
@@ -34,20 +36,61 @@ export const generateBatchQRCodes = async (count) => {
     return codes;
     };
 
+export const processQRCodeService = async (codeId) => {
+    const qrCode = await QRCodeCollection.findOne({ codeId });
 
-    export const processQRCode = async (codeId) => {
-        const qrCode = await QRCodeCollection.findOne({ codeId });
+    if (!qrCode) {
+      throw createHttpError(404, 'QR Code not found');
+    }
 
-        if (!qrCode) {
-            throw createHttpError(404, 'QR Code not found');
-        }
+    if (qrCode.isAssigned) {
+      if (!qrCode.petId) {
+        throw createHttpError(400, 'QR Code is marked as assigned but missing a petId.');
+      }
 
-        if (qrCode.userId && qrCode.petId) {
-            return { redirectUrl: `/pets/${qrCode.petId}` };
-        }
+      return {
+        message: 'QR Code is assigned. Redirecting to pet profile.',
+        redirectUrl: `/pets/${qrCode.petId}`,
+      };
+    }
 
-        return { redirectUrl: `/auth/${codeId}` };
-    };
+    if (!qrCode.petId) {
+      return {
+        message: 'QR Code not assigned to a pet. Redirect to registration.',
+        redirectUrl: '/auth/register',
+        body: { codeId },
+      };
+    }
+
+    const petId = qrCode.petId;
+
+    const user = await UsersCollection.findOne({ petId });
+    if (user) {
+      const session = await createSession(user._id);
+      return {
+        message: 'QR Code assigned to a pet. Redirecting to a pet profile.',
+        redirectUrl: `/pets/${ petId }`,
+        session,
+      };
+    }
+
+    throw createHttpError(401, 'No user associated with this pet.');
+};
+
+    // export const processQRCode = async (codeId) => {
+    //     const qrCode = await QRCodeCollection.findOne({ codeId });
+
+    //     if (!qrCode) {
+    //         throw createHttpError(404, 'QR Code not found');
+    //     }
+
+    //     // Перевірка на наявність улюбленця
+    //     if (qrCode.petId) {
+    //         return { redirectUrl: `/pets/${qrCode.petId}` };
+    //     }
+
+    //     return { redirectUrl: `/pets/create?codeId=${codeId}` };
+    // };
 
     // export const assignPetAndUserToQRCode = async (req, res) => {
     //     const { codeId, petId, userId } = req.body;

@@ -25,9 +25,8 @@ petsRouter.get(
   isValidId,
   ctrlWrapper(getPetByIdController));
 
-
 petsRouter.post(
-  '/',
+  '/create',
   validateBody(createPetScheme),
   ctrlWrapper(createPetController),
 );

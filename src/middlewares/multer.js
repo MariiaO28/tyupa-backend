@@ -15,9 +15,9 @@ const limits = {
 };
 
 const fileFilter = (req, file, cb) => {
-    const extensions = file.originalname.split('.').toUpperCase();
+    const extensions = file.originalname.split('.').pop().toUpperCase();
     if (extensions === 'exe') {
-        return cb(createHttpError(400, 'exe filr is not allowed'));
+        return cb(createHttpError(400, 'exe file is not allowed'));
     }
     cb(null, true);
 };

@@ -10,17 +10,16 @@ export const createPetScheme = Joi.object({
   color: Joi.string().required(),
   telegram: Joi.string().required(),
   avatar: Joi.string().allow('').optional(),
-  // owner: Joi.string().pattern(new RegExp("^[0-9a-fA-F]{24}$")).required(),
 });
 
 export const patchPetScheme = Joi.object({
-  name: Joi.string(),
-  birthday: Joi.string(),
-  phone: Joi.string(),
-  gender: Joi.string(),
-  breed: Joi.string(),
-  color: Joi.string(),
-  telegram: Joi.string(),
+  name: Joi.string().optional(),
+  birthday: Joi.string().optional(),
+  phone: Joi.string().optional(),
+  gender: Joi.string().optional(),
+  breed: Joi.string().optional(),
+  color: Joi.string().optional(),
+  telegram: Joi.string().optional(),
   avatar: Joi.string().allow('').optional(),
-  // code:Joi.string().required()
+  code:Joi.string().required()
 });

@@ -1,4 +1,5 @@
 import { model, Schema } from 'mongoose';
+// import { ObjectId } from 'mongodb';
 
 const petsSchema = new Schema(
   {
@@ -17,8 +18,8 @@ const petsSchema = new Schema(
     breed: { type: String, required: true },
     color: { type: String, required: true },
     telegram: { type: String, required: true },
-    avatar: {type: String, default:""},
-    // owner: { type: Schema.Types.ObjectId, ref: 'users' },
+    avatar: {type: String, default:"https://res.cloudinary.com/dpfbagody/image/upload/v1736084620/TYUPASVG_2_m676es.png"}
+    // userId: { type: ObjectId, ref: 'User', required: false }
   },
   { timestamps: true, versionKey: false },
 );

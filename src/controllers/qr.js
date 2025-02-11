@@ -1,6 +1,5 @@
-import createHttpError from 'http-errors';
-import env from '../utils/env.js';
-import { generateBatchQRCodes, processQRCode } from '../services/qr.js';
+import { generateBatchQRCodes, processQRCodeService } from '../services/qr.js';
+import { setupSessionCookies } from '../utils/createSession.js';
 
 export const generateQRCodeBatch = async (req, res) => {
     const { count } = req.body;
@@ -22,19 +21,25 @@ export const generateQRCodeBatch = async (req, res) => {
     }
 };
 
-
 export const scanQRCode = async (req, res, next) => {
-    const { codeId } = req.params;
+  const { codeId } = req.params;
 
-    try {
-      const { redirectUrl } = await processQRCode(codeId);
-      return res.redirect(`${env('APP_DOMAIN')}${redirectUrl}`);
+  try {
+    const result = await processQRCodeService(codeId);
+
+    if (result.session) {
+      setupSessionCookies(res, result.session);
     }
-    catch (error)
-    {
-      console.error(error);
-      next(createHttpError(404, 'QR Code not found'));
-    }
+
+    return res.status(200).json({
+      status: 200,
+      message: result.message,
+      redirectUrl: result.redirectUrl,
+      ...(result.body && { body: result.body }),
+    });
+
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
   };
-
-
