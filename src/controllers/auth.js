@@ -22,7 +22,6 @@ import getDigit from '../utils/getDigit.js';
 import { hashValue, hashCompare } from '../utils/hashFuncs.js';
 import userOPTCollection from '../db/models/userOTP.js';
 
-
 export const registerUserController = async (req, res) => {
   const { email } = req.body;
   const userInDB = await findUser({ email });
@@ -70,7 +69,6 @@ export const requestResetPasswordByEmailController = async (req, res) => {
 
   const resetPin = getDigit();
   const hashedPin = await hashValue(resetPin);
-
   const newOTPEntry = await createNewOTP(
     new userOPTCollection({
       userId: user._id,

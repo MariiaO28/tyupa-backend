@@ -100,7 +100,6 @@ export const loginUser = async (payload, isDesktop = false) => {
     userId: user._id,
     ...newSession,
   });
-
   return { user, session };
 };
 
